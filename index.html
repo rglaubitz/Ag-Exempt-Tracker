@@ -126,6 +126,8 @@
             cursor: pointer;
             transition: all 0.3s;
             flex: 1;
+            -webkit-tap-highlight-color: rgba(133, 0, 143, 0.1);
+            user-select: none;
         }
         
         .radio-option:hover {
@@ -138,6 +140,9 @@
             width: 20px;
             height: 20px;
             accent-color: #85008f;
+            cursor: pointer;
+            flex-shrink: 0;
+            pointer-events: none;  /* Let parent div handle all clicks */
         }
         
         .radio-option label {
@@ -145,6 +150,7 @@
             font-weight: 500;
             cursor: pointer;
             color: #040807;
+            pointer-events: none;  /* Prevents label from intercepting clicks */
         }
         
         .radio-option.selected {
@@ -434,11 +440,19 @@
             .radio-option {
                 padding: 14px 16px;
                 min-height: 50px;
+                -webkit-tap-highlight-color: transparent;  /* Remove blue flash on tap */
+                user-select: none;
             }
             
             .radio-option input[type="radio"] {
                 width: 22px;
                 height: 22px;
+                flex-shrink: 0;  /* Prevent radio from shrinking */
+                pointer-events: none;  /* Let parent handle clicks */
+            }
+            
+            .radio-option label {
+                pointer-events: none;  /* Let parent handle clicks */
             }
             
             .location-input {
@@ -562,6 +576,7 @@
         @media (hover: none) and (pointer: coarse) {
             .radio-option {
                 min-height: 52px;
+                -webkit-tap-highlight-color: transparent;
             }
             
             .location-input {
@@ -583,6 +598,11 @@
             }
             
             .radio-option.selected {
+                background: #fef9ff;
+                border-color: #85008f;
+            }
+            
+            .radio-option:active {
                 background: #fef9ff;
                 border-color: #85008f;
             }
@@ -621,11 +641,11 @@
             <div class="form-section">
                 <label id="emptyLabel">Are you currently empty?</label>
                 <div class="radio-group">
-                    <div class="radio-option" onclick="selectRadio(this, 'empty')">
+                    <div class="radio-option" onclick="selectRadio(this, 'empty', event)">
                         <input type="radio" name="empty" value="yes" id="emptyYes">
                         <label for="emptyYes" id="yesLabel1">Yes</label>
                     </div>
-                    <div class="radio-option" onclick="selectRadio(this, 'empty')">
+                    <div class="radio-option" onclick="selectRadio(this, 'empty', event)">
                         <input type="radio" name="empty" value="no" id="emptyNo">
                         <label for="emptyNo" id="noLabel1">No</label>
                     </div>
@@ -635,11 +655,11 @@
             <div class="form-section">
                 <label id="commodityLabel">Is the load an unprocessed commodity?</label>
                 <div class="radio-group">
-                    <div class="radio-option" onclick="selectRadio(this, 'commodity')">
+                    <div class="radio-option" onclick="selectRadio(this, 'commodity', event)">
                         <input type="radio" name="commodity" value="yes" id="commodityYes">
                         <label for="commodityYes" id="yesLabel2">Yes</label>
                     </div>
-                    <div class="radio-option" onclick="selectRadio(this, 'commodity')">
+                    <div class="radio-option" onclick="selectRadio(this, 'commodity', event)">
                         <input type="radio" name="commodity" value="no" id="commodityNo">
                         <label for="commodityNo" id="noLabel2">No</label>
                     </div>
@@ -875,9 +895,9 @@
             event.target.classList.add('active');
         }
         
-        function selectRadio(element, group) {
+        function selectRadio(element, group, event) {
             // Prevent double-tap zoom on mobile
-            event.preventDefault();
+            if (event) event.preventDefault();
             
             // Remove selected class from all options in the group
             document.querySelectorAll(`input[name="${group}"]`).forEach(input => {
@@ -1368,6 +1388,17 @@
         
         // Add PWA install prompt for mobile
         window.addEventListener('load', () => {
+            // Add touch event listeners for radio buttons on mobile
+            if ('ontouchstart' in window) {
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.addEventListener('touchstart', function(e) {
+                        e.preventDefault();
+                        const group = this.querySelector('input[type="radio"]').name;
+                        selectRadio(this, group, e);
+                    }, { passive: false });
+                });
+            }
+            
             // Check if standalone mode (already installed)
             if (window.matchMedia('(display-mode: standalone)').matches) {
                 console.log('App running in standalone mode');
