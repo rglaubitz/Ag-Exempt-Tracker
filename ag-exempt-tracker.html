@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Origin Transport - Ag Exempt Status Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arimo', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #85008f 0%, #040807 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .language-toggle {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-family: 'Arimo', sans-serif;
+        }
+        
+        .lang-btn.active {
+            background: white;
+            color: #85008f;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+        }
+        
+        .input-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(133, 0, 143, 0.1);
+            height: fit-content;
+            border-top: 4px solid #85008f;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #040807;
+            font-size: 1.1rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+        
+        .radio-option:hover {
+            border-color: #85008f;
+            background: #fef9ff;
+        }
+        
+        .radio-option input[type="radio"] {
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
+            accent-color: #85008f;
+        }
+        
+        .radio-option label {
+            margin: 0;
+            font-weight: 500;
+            cursor: pointer;
+            color: #040807;
+        }
+        
+        .radio-option.selected {
+            background: #fef9ff;
+            border-color: #85008f;
+        }
+        
+        .examples {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+            border-left: 3px solid #85008f;
+        }
+        
+        .location-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: 'Arimo', sans-serif;
+        }
+        
+        .location-input:focus {
+            outline: none;
+            border-color: #85008f;
+            box-shadow: 0 0 0 3px rgba(133, 0, 143, 0.1);
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: #85008f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            font-family: 'Arimo', sans-serif;
+            letter-spacing: 0.5px;
+        }
+        
+        .calculate-btn:hover {
+            background: #6a006e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(133, 0, 143, 0.3);
+        }
+        
+        .calculate-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(133, 0, 143, 0.1);
+            position: relative;
+            height: 500px;
+            overflow: hidden;
+            border-top: 4px solid #85008f;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 0 0 10px 10px;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .status-container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(133, 0, 143, 0.1);
+            display: none;
+            border-top: 4px solid #85008f;
+        }
+        
+        .status-container.show {
+            display: block;
+        }
+        
+        .status-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #85008f;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .status-section {
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .status-section.exempt {
+            background: linear-gradient(135deg, #d4edda 0%, #e8f5e9 100%);
+            border: 2px solid #27ae60;
+        }
+        
+        .status-section.not-exempt {
+            background: linear-gradient(135deg, #f8d7da 0%, #ffebed 100%);
+            border: 2px solid #e74c3c;
+        }
+        
+        .status-label {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #040807;
+        }
+        
+        .status-details {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .location-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 5px;
+        }
+        
+        .location-item strong {
+            display: inline-block;
+            min-width: 120px;
+            color: #85008f;
+            font-weight: 600;
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 500;
+            border: 2px solid #85008f;
+        }
+        
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #85008f;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .origin-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #85008f;
+        }
+        
+        .origin-badge img {
+            height: 20px;
+            width: auto;
+        }
+        
+        /* Mobile-first optimizations */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .header {
+                padding: 12px 15px;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+            
+            .header-left {
+                gap: 15px;
+            }
+            
+            .logo {
+                height: 30px;
+            }
+            
+            .header h1 {
+                font-size: 1.1rem;
+            }
+            
+            .language-toggle {
+                gap: 8px;
+            }
+            
+            .lang-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .container {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .input-panel {
+                padding: 20px 15px;
+                border-radius: 8px;
+            }
+            
+            .form-section {
+                margin-bottom: 20px;
+            }
+            
+            .form-section label {
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+            
+            .radio-group {
+                gap: 12px;
+            }
+            
+            .radio-option {
+                padding: 14px 16px;
+                min-height: 50px;
+            }
+            
+            .radio-option input[type="radio"] {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .location-input {
+                padding: 16px 14px;
+                font-size: 16px; /* Prevents zoom on iOS */
+                border-radius: 10px;
+            }
+            
+            .calculate-btn {
+                padding: 18px;
+                font-size: 1.1rem;
+                border-radius: 10px;
+                position: sticky;
+                bottom: 10px;
+                z-index: 100;
+                box-shadow: 0 -5px 20px rgba(133, 0, 143, 0.2);
+            }
+            
+            .map-container {
+                height: 400px;
+                border-radius: 8px;
+            }
+            
+            .origin-badge {
+                top: 10px;
+                left: 10px;
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+            
+            .origin-badge img {
+                height: 16px;
+            }
+            
+            .legend {
+                bottom: 10px;
+                left: 10px;
+                right: auto;
+                padding: 12px;
+                max-width: 200px;
+                background: rgba(255, 255, 255, 0.95);
+            }
+            
+            .legend-title {
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+            
+            .legend-item {
+                font-size: 0.8rem;
+                margin-bottom: 6px;
+            }
+            
+            .legend-icon {
+                width: 20px;
+                height: 20px;
+                margin-right: 8px;
+            }
+            
+            .status-container {
+                padding: 20px 15px;
+                border-radius: 8px;
+            }
+            
+            .status-title {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+            
+            .status-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .status-label {
+                font-size: 1rem;
+            }
+            
+            .status-details {
+                font-size: 0.9rem;
+            }
+            
+            .location-item {
+                padding: 10px;
+                margin: 6px 0;
+            }
+            
+            .location-item strong {
+                display: block;
+                margin-bottom: 5px;
+                font-size: 0.85rem;
+            }
+            
+            .examples {
+                font-size: 0.85rem;
+                padding: 8px;
+            }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 375px) {
+            .header h1 {
+                font-size: 1rem;
+            }
+            
+            .lang-btn {
+                padding: 6px 10px;
+                font-size: 0.85rem;
+            }
+            
+            .legend {
+                display: none; /* Hide on very small screens */
+            }
+            
+            .map-container {
+                height: 350px;
+            }
+        }
+        
+        /* Touch-friendly adjustments */
+        @media (hover: none) and (pointer: coarse) {
+            .radio-option {
+                min-height: 52px;
+            }
+            
+            .location-input {
+                min-height: 52px;
+            }
+            
+            .calculate-btn {
+                min-height: 56px;
+            }
+            
+            .lang-btn {
+                min-height: 44px;
+            }
+            
+            /* Remove hover effects on touch devices */
+            .radio-option:hover {
+                background: inherit;
+                border-color: #ddd;
+            }
+            
+            .radio-option.selected {
+                background: #fef9ff;
+                border-color: #85008f;
+            }
+        }
+        
+        /* Landscape mode adjustments */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .header {
+                padding: 8px 15px;
+            }
+            
+            .map-container {
+                height: 300px;
+            }
+            
+            .container {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <img src="https://res.cloudinary.com/openhaul/image/upload/v1755219937/Origin_Logo_wxnwvv.svg" alt="Origin Transport" class="logo">
+            <h1 id="headerTitle">Agricultural Exemption Status</h1>
+        </div>
+        <div class="language-toggle">
+            <button class="lang-btn active" onclick="setLanguage('en', event)">English</button>
+            <button class="lang-btn" onclick="setLanguage('es', event)">Español</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="input-panel">
+            <div class="form-section">
+                <label id="emptyLabel">Are you currently empty?</label>
+                <div class="radio-group">
+                    <div class="radio-option" onclick="selectRadio(this, 'empty')">
+                        <input type="radio" name="empty" value="yes" id="emptyYes">
+                        <label for="emptyYes" id="yesLabel1">Yes</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio(this, 'empty')">
+                        <input type="radio" name="empty" value="no" id="emptyNo">
+                        <label for="emptyNo" id="noLabel1">No</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <label id="commodityLabel">Is the load an unprocessed commodity?</label>
+                <div class="radio-group">
+                    <div class="radio-option" onclick="selectRadio(this, 'commodity')">
+                        <input type="radio" name="commodity" value="yes" id="commodityYes">
+                        <label for="commodityYes" id="yesLabel2">Yes</label>
+                    </div>
+                    <div class="radio-option" onclick="selectRadio(this, 'commodity')">
+                        <input type="radio" name="commodity" value="no" id="commodityNo">
+                        <label for="commodityNo" id="noLabel2">No</label>
+                    </div>
+                </div>
+                <div class="examples" id="examplesText">
+                    Examples: potatoes, grapes, seeds, livestock, wheat, corn, hay, milk, eggs, honey, Christmas trees
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <label for="currentLocation" id="currentLocationLabel">Current Location:</label>
+                <input type="text" 
+                       id="currentLocation" 
+                       class="location-input" 
+                       placeholder="Enter zip code or city, state"
+                       autocomplete="off"
+                       inputmode="text">
+            </div>
+            
+            <div class="form-section">
+                <label for="pickupLocation" id="pickupLocationLabel">Pickup Location:</label>
+                <input type="text" 
+                       id="pickupLocation" 
+                       class="location-input" 
+                       placeholder="Enter zip code or city, state"
+                       autocomplete="off"
+                       inputmode="text">
+            </div>
+            
+            <div class="form-section">
+                <label for="deliveryLocation" id="deliveryLocationLabel">Delivery Location:</label>
+                <input type="text" 
+                       id="deliveryLocation" 
+                       class="location-input" 
+                       placeholder="Enter zip code or city, state"
+                       autocomplete="off"
+                       inputmode="text">
+            </div>
+            
+            <button class="calculate-btn" onclick="calculateExemptStatus()" id="calculateBtn">
+                CHECK EXEMPTION STATUS
+            </button>
+        </div>
+        
+        <div class="right-panel">
+            <div class="map-container">
+                <div class="origin-badge">
+                    <img src="https://res.cloudinary.com/openhaul/image/upload/v1755219937/Origin_Logo_wxnwvv.svg" alt="Origin">
+                    <span>ORIGIN TRANSPORT</span>
+                </div>
+                <div id="map">Loading map...</div>
+                
+                <div class="legend">
+                    <div class="legend-title" id="legendTitle">Map Legend</div>
+                    <div class="legend-item">
+                        <div class="legend-icon">📍</div>
+                        <span id="legendEntry">Entry Alert (5mi buffer)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon">🚚</div>
+                        <span id="legendPickup">Pickup (Center)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon">🛑</div>
+                        <span id="legendExit">Exit Alert (5mi buffer)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon">📦</div>
+                        <span id="legendDelivery">Delivery Location</span>
+                    </div>
+                    <div class="legend-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                        <div style="width: 24px; height: 3px; background: #85008f; margin-right: 10px;"></div>
+                        <span style="font-size: 0.8rem;">150 mi boundary</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 24px; height: 2px; background: #FFA500; margin-right: 10px;"></div>
+                        <span style="font-size: 0.8rem;">145 mi alert zone</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-container" id="statusContainer">
+                <h2 class="status-title" id="statusTitle">Exemption Status Results</h2>
+                
+                <div class="status-grid">
+                    <div class="status-section exempt">
+                        <div class="status-label">
+                            <span>✓</span>
+                            <span id="exemptLabel">AG EXEMPT ZONES</span>
+                        </div>
+                        <div class="status-details" id="exemptDetails">
+                            <div class="location-item">
+                                <strong id="entryLabel">Entry Point:</strong>
+                                <span id="entryPoint">-</span>
+                            </div>
+                            <div class="location-item">
+                                <strong id="pickupLabel">Pickup:</strong>
+                                <span id="pickupPoint">-</span>
+                            </div>
+                            <div class="location-item">
+                                <strong id="exitLabel">Exit Point:</strong>
+                                <span id="exitPoint">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-section not-exempt">
+                        <div class="status-label">
+                            <span>✗</span>
+                            <span id="nonExemptLabel">REGULAR HOS ZONES</span>
+                        </div>
+                        <div class="status-details" id="nonExemptDetails">
+                            <div class="location-item" id="currentNonExempt" style="display:none;">
+                                <strong id="currentLabel">Current:</strong>
+                                <span id="currentPoint">-</span>
+                            </div>
+                            <div class="location-item" id="beyondExitPoint" style="display:none;">
+                                <strong id="beyondLabel">Beyond Exit:</strong>
+                                <span id="beyondPoint">-</span>
+                            </div>
+                            <div class="location-item" id="deliveryNonExempt" style="display:none;">
+                                <strong id="deliveryLabel">Delivery:</strong>
+                                <span id="deliveryPoint">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Translation system
+        const translations = {
+            en: {
+                headerTitle: "Agricultural Exemption Status",
+                emptyLabel: "Are you currently empty?",
+                commodityLabel: "Is the load an unprocessed commodity?",
+                yesLabel: "Yes",
+                noLabel: "No",
+                examplesText: "Examples: potatoes, grapes, seeds, livestock, wheat, corn, hay, milk, eggs, honey, Christmas trees",
+                currentLocationLabel: "Current Location:",
+                pickupLocationLabel: "Pickup Location:",
+                deliveryLocationLabel: "Delivery Location:",
+                calculateBtn: "CHECK EXEMPTION STATUS",
+                statusTitle: "Exemption Status Results",
+                exemptLabel: "AG EXEMPT ZONES",
+                nonExemptLabel: "REGULAR HOS ZONES",
+                entryLabel: "Switch Point IN:",
+                pickupLabel: "Pickup Location:",
+                exitLabel: "Switch Point OUT:",
+                currentLabel: "Current:",
+                beyondLabel: "Beyond Exit:",
+                deliveryLabel: "Delivery:",
+                legendTitle: "Map Legend",
+                legendEntry: "Entry Alert (5mi buffer)",
+                legendPickup: "Pickup (Center)",
+                legendExit: "Exit Alert (5mi buffer)",
+                legendDelivery: "Delivery Location"
+            },
+            es: {
+                headerTitle: "Estado de Exención Agrícola",
+                emptyLabel: "¿Está actualmente vacío?",
+                commodityLabel: "¿Es la carga un producto sin procesar?",
+                yesLabel: "Sí",
+                noLabel: "No",
+                examplesText: "Ejemplos: papas, uvas, semillas, ganado, trigo, maíz, heno, leche, huevos, miel, árboles de navidad",
+                currentLocationLabel: "Ubicación Actual:",
+                pickupLocationLabel: "Ubicación de Recogida:",
+                deliveryLocationLabel: "Ubicación de Entrega:",
+                calculateBtn: "VERIFICAR ESTADO DE EXENCIÓN",
+                statusTitle: "Resultados del Estado de Exención",
+                exemptLabel: "ZONAS EXENTAS AG",
+                nonExemptLabel: "ZONAS HOS REGULARES",
+                entryLabel: "Punto de Cambio ENTRADA:",
+                pickupLabel: "Ubicación de Recogida:",
+                exitLabel: "Punto de Cambio SALIDA:",
+                currentLabel: "Actual:",
+                beyondLabel: "Más Allá de Salida:",
+                deliveryLabel: "Entrega:",
+                legendTitle: "Leyenda del Mapa",
+                legendEntry: "Alerta de Entrada (5mi zona)",
+                legendPickup: "Recogida (Centro)",
+                legendExit: "Alerta de Salida (5mi zona)",
+                legendDelivery: "Ubicación de Entrega"
+            }
+        };
+        
+        let currentLang = 'en';
+        let map;
+        let exemptCircle;
+        let bufferCircle;
+        let markers = [];
+        let directionsRenderer;
+        let geocoder;
+        
+        function setLanguage(lang, event) {
+            currentLang = lang;
+            const trans = translations[lang];
+            
+            // Update all text elements
+            document.getElementById('headerTitle').textContent = trans.headerTitle;
+            document.getElementById('emptyLabel').textContent = trans.emptyLabel;
+            document.getElementById('commodityLabel').textContent = trans.commodityLabel;
+            document.getElementById('yesLabel1').textContent = trans.yesLabel;
+            document.getElementById('noLabel1').textContent = trans.noLabel;
+            document.getElementById('yesLabel2').textContent = trans.yesLabel;
+            document.getElementById('noLabel2').textContent = trans.noLabel;
+            document.getElementById('examplesText').textContent = trans.examplesText;
+            document.getElementById('currentLocationLabel').textContent = trans.currentLocationLabel;
+            document.getElementById('pickupLocationLabel').textContent = trans.pickupLocationLabel;
+            document.getElementById('deliveryLocationLabel').textContent = trans.deliveryLocationLabel;
+            document.getElementById('calculateBtn').textContent = trans.calculateBtn;
+            document.getElementById('statusTitle').textContent = trans.statusTitle;
+            document.getElementById('exemptLabel').textContent = trans.exemptLabel;
+            document.getElementById('nonExemptLabel').textContent = trans.nonExemptLabel;
+            document.getElementById('entryLabel').textContent = trans.entryLabel;
+            document.getElementById('pickupLabel').textContent = trans.pickupLabel;
+            document.getElementById('exitLabel').textContent = trans.exitLabel;
+            document.getElementById('currentLabel').textContent = trans.currentLabel;
+            document.getElementById('beyondLabel').textContent = trans.beyondLabel;
+            document.getElementById('deliveryLabel').textContent = trans.deliveryLabel;
+            document.getElementById('legendTitle').textContent = trans.legendTitle;
+            document.getElementById('legendEntry').textContent = trans.legendEntry;
+            document.getElementById('legendPickup').textContent = trans.legendPickup;
+            document.getElementById('legendExit').textContent = trans.legendExit;
+            document.getElementById('legendDelivery').textContent = trans.legendDelivery;
+            
+            // Update language buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function selectRadio(element, group) {
+            // Prevent double-tap zoom on mobile
+            event.preventDefault();
+            
+            // Remove selected class from all options in the group
+            document.querySelectorAll(`input[name="${group}"]`).forEach(input => {
+                input.parentElement.classList.remove('selected');
+            });
+            
+            // Add selected class and check the radio
+            element.classList.add('selected');
+            element.querySelector('input[type="radio"]').checked = true;
+            
+            // Haptic feedback on mobile (if supported)
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate(10);
+            }
+        }
+        
+        function initMap() {
+            console.log('Initializing map...');
+            document.getElementById('map').innerHTML = '';
+            
+            // Map style with Origin Transport branding colors
+            const mapStyles = [
+                {
+                    featureType: "all",
+                    elementType: "all",
+                    stylers: [{ saturation: -80 }]
+                },
+                {
+                    featureType: "poi",
+                    elementType: "labels",
+                    stylers: [{ visibility: "off" }]
+                },
+                {
+                    featureType: "road",
+                    elementType: "geometry",
+                    stylers: [{ lightness: 30 }]
+                },
+                {
+                    featureType: "water",
+                    elementType: "geometry",
+                    stylers: [{ color: "#e9e9e9" }]
+                }
+            ];
+            
+            // Detect mobile for better controls
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            // Center map on Idaho Falls by default
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 7,
+                center: { lat: 43.4666, lng: -112.0341 },
+                mapTypeId: 'roadmap',
+                styles: mapStyles,
+                // Mobile-friendly controls
+                mapTypeControl: false,
+                fullscreenControl: !isMobile,
+                streetViewControl: false,
+                zoomControl: true,
+                zoomControlOptions: {
+                    position: isMobile ? 
+                        google.maps.ControlPosition.RIGHT_CENTER : 
+                        google.maps.ControlPosition.RIGHT_TOP
+                },
+                gestureHandling: isMobile ? 'greedy' : 'cooperative'
+            });
+            
+            geocoder = new google.maps.Geocoder();
+            console.log('Map initialized successfully');
+            
+            // Add current location button for mobile
+            if (isMobile && navigator.geolocation) {
+                const locationButton = document.createElement('button');
+                locationButton.innerHTML = '📍';
+                locationButton.style.cssText = `
+                    background: white;
+                    border: 2px solid #85008f;
+                    border-radius: 5px;
+                    padding: 10px;
+                    margin: 10px;
+                    font-size: 20px;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                `;
+                locationButton.title = 'Use Current Location';
+                
+                map.controls[google.maps.ControlPosition.LEFT_TOP].push(locationButton);
+                
+                locationButton.addEventListener('click', () => {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const pos = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+                            
+                            // Reverse geocode to get address
+                            geocoder.geocode({ location: pos }, (results, status) => {
+                                if (status === 'OK' && results[0]) {
+                                    // Fill current location input
+                                    document.getElementById('currentLocation').value = 
+                                        results[0].formatted_address;
+                                    
+                                    // Center map on current location
+                                    map.setCenter(pos);
+                                    map.setZoom(10);
+                                }
+                            });
+                        },
+                        () => {
+                            alert('Unable to get current location');
+                        }
+                    );
+                });
+            }
+        }
+        
+        window.initMap = initMap;
+        
+        async function calculateExemptStatus() {
+            // Get form values
+            const isEmpty = document.querySelector('input[name="empty"]:checked')?.value;
+            const isUnprocessed = document.querySelector('input[name="commodity"]:checked')?.value;
+            const currentLoc = document.getElementById('currentLocation').value;
+            const pickupLoc = document.getElementById('pickupLocation').value;
+            const deliveryLoc = document.getElementById('deliveryLocation').value;
+            
+            // Validate inputs
+            if (!isEmpty || !isUnprocessed || !currentLoc || !pickupLoc || !deliveryLoc) {
+                alert(currentLang === 'en' ? 
+                    'Please fill in all fields' : 
+                    'Por favor complete todos los campos');
+                return;
+            }
+            
+            // Check if ag exemption applies
+            const agExemptApplies = (isUnprocessed === 'yes');
+            
+            if (!agExemptApplies) {
+                const message = currentLang === 'en' ? 
+                    'Processed commodities do not qualify for agricultural exemption. Use regular Hours of Service rules for entire trip.' : 
+                    'Los productos procesados no califican para la exención agrícola. Use las reglas regulares de Horas de Servicio para todo el viaje.';
+                alert(message);
+                return;
+            }
+            
+            // Show loading state
+            const btn = document.getElementById('calculateBtn');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = currentLang === 'en' ? 'CALCULATING...' : 'CALCULANDO...';
+            
+            // Add loading animation to map
+            document.getElementById('map').style.opacity = '0.7';
+            
+            // Clear previous markers, circles, and routes
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+            if (exemptCircle) exemptCircle.setMap(null);
+            if (bufferCircle) bufferCircle.setMap(null);
+            if (directionsRenderer) directionsRenderer.setMap(null);
+            
+            try {
+                // Geocode all three locations
+                const [currentCoords, pickupCoords, deliveryCoords] = await Promise.all([
+                    geocodeLocation(geocoder, currentLoc),
+                    geocodeLocation(geocoder, pickupLoc),
+                    geocodeLocation(geocoder, deliveryLoc)
+                ]);
+                
+                // Draw 150 air mile radius circle around pickup location
+                const radiusInMeters = 150 * 1609.34; // Convert miles to meters
+                const bufferRadiusInMeters = 145 * 1609.34; // 5-mile buffer zone
+                
+                // Main exemption boundary (150 miles)
+                exemptCircle = new google.maps.Circle({
+                    strokeColor: '#85008f',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 3,
+                    fillColor: '#85008f',
+                    fillOpacity: 0.1,
+                    map: map,
+                    center: pickupCoords.coords,
+                    radius: radiusInMeters
+                });
+                
+                // Buffer zone indicator (145 miles - where warnings trigger)
+                bufferCircle = new google.maps.Circle({
+                    strokeColor: '#FFA500',  // Orange for warning zone
+                    strokeOpacity: 0.7,
+                    strokeWeight: 2,
+                    fillColor: 'transparent',
+                    fillOpacity: 0,
+                    map: map,
+                    center: pickupCoords.coords,
+                    radius: bufferRadiusInMeters
+                });
+                
+                // Calculate route and find intersection points
+                const directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    map: map,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: '#040807',
+                        strokeWeight: 4,
+                        strokeOpacity: 0.8
+                    }
+                });
+                
+                // Calculate route from current to pickup to delivery
+                const waypoints = [];
+                if (currentLoc !== pickupLoc) {
+                    waypoints.push({
+                        location: pickupCoords.coords,
+                        stopover: true
+                    });
+                }
+                
+                directionsService.route({
+                    origin: currentCoords.coords,
+                    destination: deliveryCoords.coords,
+                    waypoints: waypoints,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, async (result, status) => {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(result);
+                        
+                        // Find entry and exit points
+                        const route = result.routes[0];
+                        const entryExit = findEntryExitPoints(route, pickupCoords.coords, radiusInMeters);
+                        
+                        // Create custom markers with Origin branding
+                        if (entryExit.entryPoint) {
+                            const entryMarker = new google.maps.Marker({
+                                position: entryExit.entryPoint,
+                                map: map,
+                                title: 'Entry Point',
+                                label: {
+                                    text: '📍',
+                                    fontSize: '20px'
+                                },
+                                animation: google.maps.Animation.DROP
+                            });
+                            markers.push(entryMarker);
+                            
+                            // Reverse geocode entry point
+                            const entryAddress = await reverseGeocode(entryExit.entryPoint);
+                            const entryText = currentLang === 'en' ? 
+                                `${entryAddress} (Switch to AG EXEMPT here - 5 miles before boundary)` :
+                                `${entryAddress} (Cambie a AG EXENTO aquí - 5 millas antes del límite)`;
+                            document.getElementById('entryPoint').textContent = entryText;
+                        }
+                        
+                        // Pickup marker
+                        const pickupMarker = new google.maps.Marker({
+                            position: pickupCoords.coords,
+                            map: map,
+                            title: 'Pickup Location',
+                            label: {
+                                text: '🚚',
+                                fontSize: '20px'
+                            },
+                            animation: google.maps.Animation.DROP
+                        });
+                        markers.push(pickupMarker);
+                        const pickupText = currentLang === 'en' ?
+                            `${pickupCoords.formatted} (Center of 150-mile exemption zone)` :
+                            `${pickupCoords.formatted} (Centro de zona de exención de 150 millas)`;
+                        document.getElementById('pickupPoint').textContent = pickupText;
+                        
+                        if (entryExit.exitPoint) {
+                            const exitMarker = new google.maps.Marker({
+                                position: entryExit.exitPoint,
+                                map: map,
+                                title: 'Exit Point',
+                                label: {
+                                    text: '🛑',
+                                    fontSize: '20px'
+                                },
+                                animation: google.maps.Animation.DROP
+                            });
+                            markers.push(exitMarker);
+                            
+                            // Reverse geocode exit point
+                            const exitAddress = await reverseGeocode(entryExit.exitPoint);
+                            const exitText = currentLang === 'en' ?
+                                `${exitAddress} (Switch to REGULAR HOS here - 5 miles before boundary)` :
+                                `${exitAddress} (Cambie a HOS REGULAR aquí - 5 millas antes del límite)`;
+                            document.getElementById('exitPoint').textContent = exitText;
+                        }
+                        
+                        // Delivery marker
+                        const deliveryMarker = new google.maps.Marker({
+                            position: deliveryCoords.coords,
+                            map: map,
+                            title: 'Delivery Location',
+                            label: {
+                                text: '📦',
+                                fontSize: '20px'
+                            },
+                            animation: google.maps.Animation.DROP
+                        });
+                        markers.push(deliveryMarker);
+                        
+                        // Update status display
+                        updateStatusDisplay(currentCoords, pickupCoords, deliveryCoords, entryExit, radiusInMeters);
+                        
+                        // Fit map to show all markers and circles
+                        const bounds = new google.maps.LatLngBounds();
+                        markers.forEach(marker => bounds.extend(marker.getPosition()));
+                        bounds.union(exemptCircle.getBounds());
+                        map.fitBounds(bounds);
+                        
+                        // Smooth scroll to results on mobile
+                        if (window.innerWidth <= 768) {
+                            setTimeout(() => {
+                                document.getElementById('statusContainer').scrollIntoView({ 
+                                    behavior: 'smooth', 
+                                    block: 'nearest' 
+                                });
+                            }, 500);
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                alert(currentLang === 'en' ? 
+                    'Error geocoding locations. Please check your entries and try again.' : 
+                    'Error al geocodificar ubicaciones. Verifique sus entradas e intente nuevamente.');
+                console.error('Geocoding error:', error);
+            } finally {
+                // Reset loading state
+                btn.disabled = false;
+                btn.textContent = originalText;
+                document.getElementById('map').style.opacity = '1';
+            }
+        }
+        
+        function findEntryExitPoints(route, pickupCenter, radius) {
+            let entryPoint = null;
+            let exitPoint = null;
+            const bufferDistance = 5 * 1609.34; // 5 miles in meters
+            const effectiveRadius = radius - bufferDistance; // 145 miles instead of 150
+            
+            // Build array of all route points with distances
+            const routePoints = [];
+            let accumulatedDistance = 0;
+            
+            route.legs.forEach(leg => {
+                leg.steps.forEach(step => {
+                    const stepDistance = step.distance.value; // Distance in meters
+                    
+                    routePoints.push({
+                        location: step.start_location,
+                        distanceFromPickup: google.maps.geometry.spherical.computeDistanceBetween(
+                            step.start_location, pickupCenter
+                        ),
+                        routeDistance: accumulatedDistance
+                    });
+                    
+                    accumulatedDistance += stepDistance;
+                    
+                    routePoints.push({
+                        location: step.end_location,
+                        distanceFromPickup: google.maps.geometry.spherical.computeDistanceBetween(
+                            step.end_location, pickupCenter
+                        ),
+                        routeDistance: accumulatedDistance
+                    });
+                });
+            });
+            
+            // Find where route crosses the 145-mile boundary (5 miles inside the 150-mile radius)
+            for (let i = 1; i < routePoints.length; i++) {
+                const prev = routePoints[i - 1];
+                const curr = routePoints[i];
+                
+                // Entering the exempt zone (crossing from outside to inside)
+                if (!entryPoint && prev.distanceFromPickup > effectiveRadius && curr.distanceFromPickup <= effectiveRadius) {
+                    // Interpolate to find exact crossing point
+                    const ratio = (effectiveRadius - curr.distanceFromPickup) / 
+                                 (prev.distanceFromPickup - curr.distanceFromPickup);
+                    
+                    entryPoint = google.maps.geometry.spherical.interpolate(
+                        curr.location, prev.location, ratio
+                    );
+                }
+                
+                // Exiting the exempt zone (crossing from inside to outside)
+                if (!exitPoint && prev.distanceFromPickup <= effectiveRadius && curr.distanceFromPickup > effectiveRadius) {
+                    // Interpolate to find exact crossing point
+                    const ratio = (effectiveRadius - prev.distanceFromPickup) / 
+                                 (curr.distanceFromPickup - prev.distanceFromPickup);
+                    
+                    exitPoint = google.maps.geometry.spherical.interpolate(
+                        prev.location, curr.location, ratio
+                    );
+                }
+            }
+            
+            return { entryPoint, exitPoint };
+        }
+        
+        async function geocodeLocation(geocoder, address) {
+            return new Promise((resolve, reject) => {
+                geocoder.geocode({ address: address }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        resolve({
+                            coords: results[0].geometry.location,
+                            formatted: results[0].formatted_address
+                        });
+                    } else {
+                        reject(new Error(`Geocoding failed for ${address}: ${status}`));
+                    }
+                });
+            });
+        }
+        
+        async function reverseGeocode(latLng) {
+            return new Promise((resolve) => {
+                geocoder.geocode({ location: latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        // Extract city, state, and zip from the results
+                        const components = results[0].address_components;
+                        let city = '', state = '', zip = '';
+                        
+                        components.forEach(comp => {
+                            if (comp.types.includes('locality')) city = comp.long_name;
+                            if (comp.types.includes('administrative_area_level_1')) state = comp.short_name;
+                            if (comp.types.includes('postal_code')) zip = comp.long_name;
+                        });
+                        
+                        resolve(`${zip ? zip + ', ' : ''}${city}, ${state}`);
+                    } else {
+                        resolve('Location point on route');
+                    }
+                });
+            });
+        }
+        
+        function updateStatusDisplay(currentCoords, pickupCoords, deliveryCoords, entryExit, radius) {
+            document.getElementById('statusContainer').classList.add('show');
+            
+            // Check distances
+            const currentDist = google.maps.geometry.spherical.computeDistanceBetween(
+                currentCoords.coords, pickupCoords.coords
+            );
+            const deliveryDist = google.maps.geometry.spherical.computeDistanceBetween(
+                deliveryCoords.coords, pickupCoords.coords
+            );
+            
+            // Update non-exempt zones
+            const currentNonExempt = document.getElementById('currentNonExempt');
+            const deliveryNonExempt = document.getElementById('deliveryNonExempt');
+            const beyondExit = document.getElementById('beyondExitPoint');
+            
+            if (currentDist > radius) {
+                currentNonExempt.style.display = 'block';
+                document.getElementById('currentPoint').textContent = currentCoords.formatted;
+            } else {
+                currentNonExempt.style.display = 'none';
+            }
+            
+            if (deliveryDist > radius) {
+                deliveryNonExempt.style.display = 'block';
+                document.getElementById('deliveryPoint').textContent = deliveryCoords.formatted;
+                
+                if (entryExit.exitPoint) {
+                    beyondExit.style.display = 'block';
+                    document.getElementById('beyondPoint').textContent = 
+                        currentLang === 'en' ? 'All areas after exit point' : 'Todas las áreas después del punto de salida';
+                }
+            } else {
+                deliveryNonExempt.style.display = 'none';
+                beyondExit.style.display = 'none';
+            }
+            
+            // If no entry/exit points (everything within radius)
+            if (!entryExit.entryPoint) {
+                document.getElementById('entryPoint').textContent = 
+                    currentLang === 'en' ? 'Already within 145-mile alert zone - Use AG EXEMPT' : 'Ya dentro de la zona de alerta de 145 millas - Use AG EXENTO';
+            }
+            if (!entryExit.exitPoint) {
+                document.getElementById('exitPoint').textContent = 
+                    currentLang === 'en' ? 'Entire route within exempt zone - AG EXEMPT all the way' : 'Ruta completa dentro de zona exenta - AG EXENTO todo el camino';
+            }
+        }
+        
+        // Add PWA install prompt for mobile
+        window.addEventListener('load', () => {
+            // Check if standalone mode (already installed)
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('App running in standalone mode');
+            }
+            
+            // iOS install prompt
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if (isIOS && !window.navigator.standalone) {
+                setTimeout(() => {
+                    if (localStorage.getItem('iosInstallPromptShown') !== 'true') {
+                        const message = currentLang === 'en' ? 
+                            'Add this app to your home screen for quick access. Tap the share button and select "Add to Home Screen"' :
+                            'Agregue esta aplicación a su pantalla de inicio para acceso rápido. Toque el botón compartir y seleccione "Agregar a pantalla de inicio"';
+                        
+                        if (confirm(message)) {
+                            localStorage.setItem('iosInstallPromptShown', 'true');
+                        }
+                    }
+                }, 3000);
+            }
+        });
+        
+        // Load Google Maps with provided API key
+        function loadGoogleMapsAPI() {
+            const script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAqllB_QAFPTXWm3Et8xGHFn5Wr9lw_DIM&callback=initMap&libraries=geometry,places';
+            script.async = true;
+            script.defer = true;
+            script.onerror = function() {
+                console.error('Failed to load Google Maps API');
+                alert('Failed to load Google Maps. Please check your internet connection and API key.');
+            };
+            document.head.appendChild(script);
+        }
+        
+        // Load the map when page loads
+        window.onload = function() {
+            console.log('Page loaded, attempting to load Google Maps API...');
+            loadGoogleMapsAPI();
+        };
+        
+        // Add error handling for API loading issues
+        window.gm_authFailure = function() {
+            console.error('Google Maps authentication failed');
+            document.getElementById('map').innerHTML = '<div style="padding: 20px; text-align: center;">⚠️ Google Maps API authentication failed. Please check API key configuration.</div>';
+        };
+    </script>
+</body>
+</html>
